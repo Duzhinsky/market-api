@@ -18,10 +18,10 @@ public class ShopUnitEntity {
     @Id
     @GenericGenerator(name = "UUIDGenerator", strategy = "uuid2")
     @GeneratedValue(generator = "UUIDGenerator")
-    private UUID recordId;
-
-    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
+
+    @Column(name = "unit_id", updatable = false, nullable = false)
+    private UUID unitId;
 
     @Column(name = "name", length = 255, nullable = false)
     private String name;

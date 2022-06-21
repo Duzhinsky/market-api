@@ -23,34 +23,34 @@ public class ShopUnitRepositoryTest {
         ShopUnitEntity entity = new ShopUnitEntity();
         entity.setValidFrom(new Date(100));
         entity.setValidTill(new Date(110));
-        entity.setId(new UUID(2,1));
+        entity.setUnitId(new UUID(2,1));
         entity.setName("some name");
         entity.setType(ShopUnitType.OFFER);
         entity = shopUnitRepository.save(entity);
 
         ShopUnitEntity entityChange = new ShopUnitEntity();
-        entityChange.setId(entity.getId());
+        entityChange.setUnitId(entity.getUnitId());
         entityChange.setValidFrom(new Date(110));
         entityChange.setValidTill(null);
-        entityChange.setId(new UUID(2,1));
+        entityChange.setUnitId(new UUID(2,1));
         entityChange.setName("some name");
         entityChange.setType(ShopUnitType.OFFER);
         shopUnitRepository.save(entityChange);
 
         Assert.isTrue(
-                shopUnitRepository.findByIdAndValidTillIsNull(entity.getId())
+                shopUnitRepository.findByUnitIdAndValidTillIsNull(entity.getUnitId())
                         .isPresent(),
                 "The version should be found!"
         );
 
         Assert.isTrue(
-                shopUnitRepository.findByIdAndValidTillIsNull(entity.getId())
-                        .get().getRecordId() == entityChange.getRecordId(),
+                shopUnitRepository.findByUnitIdAndValidTillIsNull(entity.getUnitId())
+                        .get().getId() == entityChange.getId(),
                 "The version should be found!"
         );
 
         Assert.isTrue(
-                shopUnitRepository.findAllById(entity.getId()).size() == 2,
+                shopUnitRepository.findAllByUnitId(entity.getUnitId()).size() == 2,
                 "Unit should have 2 records"
         );
     }

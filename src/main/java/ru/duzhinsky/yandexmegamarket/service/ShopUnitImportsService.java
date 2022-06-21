@@ -50,7 +50,7 @@ public class ShopUnitImportsService {
                     importQueue.add(node);
                     continue;
                 }
-                if(unitRepository.findById( UUID.fromString(node.getId()) ).isEmpty())
+                if(unitRepository.findByUnitId( UUID.fromString(node.getId()) ).isEmpty())
                     throw new WrongParentDataException();
             }
             importNode(node, importDate);
@@ -61,7 +61,7 @@ public class ShopUnitImportsService {
 
     private void importNode(ShopUnitImportDto node, Date importDate) throws WrongPriceValueException {
         if(node.getPrice() < 0) throw new WrongPriceValueException();
-        unitRepository.findById( UUID.fromString(node.getId()) ).ifPresent(
+        unitRepository.findByUnitId( UUID.fromString(node.getId()) ).ifPresent(
                 unitEntity -> {
                     unitEntity.setValidTill(importDate);
                     unitRepository.save(unitEntity);

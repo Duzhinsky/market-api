@@ -19,9 +19,9 @@ public class ShopUnitImportDto {
 
     public static ShopUnitImportDto toDto(ShopUnitEntity entity) {
         ShopUnitImportDto dto = new ShopUnitImportDto(
-                entity.getId().toString(),
+                entity.getUnitId().toString(),
                 entity.getName(),
-                entity.getParent() == null ? null : entity.getParent().getId().toString(),
+                entity.getParent() == null ? null : entity.getParent().getUnitId().toString(),
                 entity.getType().toString(),
                 entity.getPrice()
         );
@@ -30,7 +30,7 @@ public class ShopUnitImportDto {
 
     public static ShopUnitEntity toEntity(ShopUnitImportDto dto) {
         ShopUnitEntity entity = new ShopUnitEntity();
-        entity.setId(UUID.fromString(dto.getId()));
+        entity.setUnitId(UUID.fromString(dto.getId()));
         entity.setName(dto.getName());
         entity.setType(ShopUnitType.valueOf(dto.getType()));
         entity.setPrice(dto.getPrice());

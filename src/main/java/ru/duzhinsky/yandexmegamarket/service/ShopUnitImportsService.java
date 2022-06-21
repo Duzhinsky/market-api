@@ -26,7 +26,6 @@ public class ShopUnitImportsService {
     private ShopUnitRepository unitRepository;
 
     @Transactional
-    @Async
     public void importUnits(ShopUnitImportRequestDto requestDto)
             throws
             WrongDateFormatException,

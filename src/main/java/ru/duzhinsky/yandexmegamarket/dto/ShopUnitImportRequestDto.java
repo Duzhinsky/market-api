@@ -10,5 +10,5 @@ import java.util.List;
 @Getter @Setter
 public class ShopUnitImportRequestDto {
     private List<ShopUnitImportDto> items;
-    private String date;
+    private String updateDate;
 }

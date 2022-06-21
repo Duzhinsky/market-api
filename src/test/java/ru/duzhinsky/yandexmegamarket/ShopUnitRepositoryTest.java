@@ -55,4 +55,5 @@ public class ShopUnitRepositoryTest {
         );
     }
 
+    //todo test delete
 }

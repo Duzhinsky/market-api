@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.duzhinsky.yandexmegamarket.dto.BadRequestDto;
 import ru.duzhinsky.yandexmegamarket.dto.ShopUnitImportRequestDto;
+import ru.duzhinsky.yandexmegamarket.exceptions.WrongParentDataException;
 import ru.duzhinsky.yandexmegamarket.exceptions.WrongDateFormatException;
+import ru.duzhinsky.yandexmegamarket.exceptions.WrongPriceValueException;
 import ru.duzhinsky.yandexmegamarket.service.ShopUnitImportsService;
 
 @RestController
@@ -22,10 +24,12 @@ public class ShopUnitController {
         try {
             importsService.importUnits(requestDto);
             return ResponseEntity.ok().build();
-        } catch (WrongDateFormatException e) {
+        }
+        catch (WrongDateFormatException | WrongParentDataException | WrongPriceValueException e) {
             return ResponseEntity.badRequest().body(new BadRequestDto("Validation Failed"));
         }
         catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }

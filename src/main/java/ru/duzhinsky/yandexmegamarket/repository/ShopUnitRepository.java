@@ -11,6 +11,9 @@ import java.util.UUID;
 @Repository
 public interface ShopUnitRepository extends CrudRepository<ShopUnitEntity, UUID> {
     Optional<ShopUnitEntity> findByUnitIdAndValidTillIsNull(UUID id);
-    Optional<ShopUnitEntity> findByUnitId(UUID unitId);
     List<ShopUnitEntity> findAllByUnitId(UUID unitId);
+
+    default Optional<ShopUnitEntity> findLatestVersion(UUID id) {
+        return findByUnitIdAndValidTillIsNull(id);
+    }
 }

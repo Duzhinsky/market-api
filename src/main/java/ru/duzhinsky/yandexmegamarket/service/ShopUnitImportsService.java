@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.duzhinsky.yandexmegamarket.dto.ShopUnitImportDto;
 import ru.duzhinsky.yandexmegamarket.dto.ShopUnitImportRequestDto;
 import ru.duzhinsky.yandexmegamarket.entity.ShopUnitEntity;
+import ru.duzhinsky.yandexmegamarket.exceptions.ShopUnitTypeChangeException;
 import ru.duzhinsky.yandexmegamarket.exceptions.WrongParentDataException;
 import ru.duzhinsky.yandexmegamarket.exceptions.WrongDateFormatException;
 import ru.duzhinsky.yandexmegamarket.exceptions.WrongPriceValueException;
@@ -30,7 +31,8 @@ public class ShopUnitImportsService {
             throws
             WrongDateFormatException,
             WrongParentDataException,
-            WrongPriceValueException
+            WrongPriceValueException,
+            ShopUnitTypeChangeException
     {
         Date importDate = getDateFromDto(requestDto);
 
@@ -50,7 +52,7 @@ public class ShopUnitImportsService {
                     importQueue.add(node);
                     continue;
                 }
-                if(unitRepository.findByUnitId( UUID.fromString(node.getId()) ).isEmpty())
+                if(unitRepository.findLatestVersion( UUID.fromString(node.getId()) ).isEmpty())
                     throw new WrongParentDataException();
             }
             importNode(node, importDate);
@@ -59,14 +61,20 @@ public class ShopUnitImportsService {
 
     }
 
-    private void importNode(ShopUnitImportDto node, Date importDate) throws WrongPriceValueException {
+    private void importNode(ShopUnitImportDto node, Date importDate)
+            throws
+            WrongPriceValueException,
+            ShopUnitTypeChangeException
+    {
         if(node.getPrice() < 0) throw new WrongPriceValueException();
-        unitRepository.findByUnitId( UUID.fromString(node.getId()) ).ifPresent(
-                unitEntity -> {
-                    unitEntity.setValidTill(importDate);
-                    unitRepository.save(unitEntity);
-                }
-        );
+        var unitEntityOpt = unitRepository.findLatestVersion( UUID.fromString(node.getId()) );
+        if(unitEntityOpt.isPresent()) {
+            var unitEntity = unitEntityOpt.get();
+            if (!node.getType().equals(unitEntity.getType().toString()))
+                throw new ShopUnitTypeChangeException();
+            unitEntity.setValidTill(importDate);
+            unitRepository.save(unitEntity);
+        };
         ShopUnitEntity newRecord = ShopUnitImportDto.toEntity(node);
         newRecord.setValidFrom(importDate);
         unitRepository.save(newRecord);

@@ -3,8 +3,6 @@ version: '2'
 services:
   app:
     image: 'duzhinsky/yandex-mega-market:latest'
-    build:
-      context: docker
     container_name: app
     restart: always
     ports:

@@ -1,7 +1,6 @@
 package ru.duzhinsky.yandexmegamarket.service;
 
 import lombok.extern.java.Log;
-import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,11 +11,9 @@ import ru.duzhinsky.yandexmegamarket.entity.ShopUnitType;
 import ru.duzhinsky.yandexmegamarket.exceptions.*;
 import ru.duzhinsky.yandexmegamarket.repository.ShopUnitRepository;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.time.temporal.TemporalAccessor;
 import java.util.*;
 
 @Service
@@ -36,7 +33,8 @@ public class ShopUnitImportsService {
             WrongParentDataException,
             WrongPriceValueException,
             ShopUnitTypeChangeException,
-            ShopUnitDuplicateException
+            ShopUnitDuplicateException,
+            WrongNameException
     {
         LocalDateTime importDate = getDateFromDto(requestDto);
 
@@ -111,11 +109,16 @@ public class ShopUnitImportsService {
     private ShopUnitEntity importNode(ShopUnitImportDto node, LocalDateTime importDate)
             throws
             WrongPriceValueException,
-            ShopUnitTypeChangeException
+            ShopUnitTypeChangeException,
+            WrongNameException
     {
+        if(node.getName() == null)
+            throw new WrongNameException();
         if(node.getPrice() != null && node.getPrice() < 0)
             throw new WrongPriceValueException();
         if(node.getPrice() != null && node.getType().equals(ShopUnitType.CATEGORY.toString()))
+            throw new WrongPriceValueException();
+        if(node.getPrice() == null && node.getType().equals(ShopUnitType.OFFER.toString()))
             throw new WrongPriceValueException();
         var unitEntityOpt = unitRepository.findLatestVersion( UUID.fromString(node.getId()) );
         if(unitEntityOpt.isPresent()) {

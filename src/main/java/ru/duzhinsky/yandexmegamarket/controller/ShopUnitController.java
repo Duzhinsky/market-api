@@ -33,7 +33,6 @@ public class ShopUnitController {
                 return ResponseEntity.ok().build();
             }
             catch (Exception e) {
-                e.printStackTrace();
                 return ResponseEntity.badRequest().body(new BadRequestDto("Validation Failed"));
             }
         });
@@ -72,7 +71,6 @@ public class ShopUnitController {
                 return ResponseEntity.status(404).body(new BadRequestDto("Item not found"));
             }
             catch (Exception e) {
-                e.printStackTrace();
                 return ResponseEntity.badRequest().body(new BadRequestDto("Validation Failed"));
             }
         });

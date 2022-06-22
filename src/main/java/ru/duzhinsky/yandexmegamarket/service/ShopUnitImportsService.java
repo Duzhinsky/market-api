@@ -13,6 +13,7 @@ import ru.duzhinsky.yandexmegamarket.exceptions.WrongDateFormatException;
 import ru.duzhinsky.yandexmegamarket.exceptions.WrongPriceValueException;
 import ru.duzhinsky.yandexmegamarket.repository.ShopUnitRepository;
 
+import java.math.BigInteger;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -34,9 +35,8 @@ public class ShopUnitImportsService {
             ShopUnitTypeChangeException
     {
         Date importDate = getDateFromDto(requestDto);
-
-        // Поскольку порядок не гарантирован, нужно импортировать по ходу добавления потомков
         Queue<ShopUnitImportDto> importQueue = new LinkedList<>();
+        Set<ShopUnitEntity> categories = new HashSet<>();
         Set<String> idsSet = new HashSet<>();
         requestDto.getItems().forEach(unitDto -> {
             idsSet.add(unitDto.getId());
@@ -51,21 +51,36 @@ public class ShopUnitImportsService {
                     importQueue.add(node);
                     continue;
                 }
-                if(unitRepository.findLatestVersion( UUID.fromString(node.getParentId()) ).isEmpty())
+                var parentOpt = unitRepository.findLatestVersion( UUID.fromString(node.getParentId()) );
+                if(parentOpt.isEmpty())
                     throw new WrongParentDataException();
+                else {
+                    var parent = parentOpt.get();
+                    if(parent.getType() == ShopUnitType.OFFER)
+                        throw new WrongParentDataException();
+                    else
+                        categories.add(parent);
+                }
             }
-            importNode(node, importDate);
+            var entity = importNode(node, importDate);
             idsSet.remove(node.getId());
         }
 
+        for(ShopUnitEntity entity : categories) {
+            calculateAveragePriceForCategory(entity);
+            unitRepository.save(entity);
+        }
     }
 
-    private void importNode(ShopUnitImportDto node, Date importDate)
+    private ShopUnitEntity importNode(ShopUnitImportDto node, Date importDate)
             throws
             WrongPriceValueException,
             ShopUnitTypeChangeException
     {
-        if(node.getPrice() < 0) throw new WrongPriceValueException();
+        if(node.getPrice() != null && node.getPrice() < 0)
+            throw new WrongPriceValueException();
+        if(node.getPrice() != null && node.getType().equals(ShopUnitType.CATEGORY.toString()))
+            throw new WrongPriceValueException();
         var unitEntityOpt = unitRepository.findLatestVersion( UUID.fromString(node.getId()) );
         if(unitEntityOpt.isPresent()) {
             var unitEntity = unitEntityOpt.get();
@@ -76,9 +91,35 @@ public class ShopUnitImportsService {
         };
         ShopUnitEntity newRecord = toEntity(node);
         newRecord.setValidFrom(importDate);
-        unitRepository.save(newRecord);
+        return unitRepository.save(newRecord);
     }
 
+    private void calculateAveragePriceForCategory(ShopUnitEntity entity) {
+        List<ShopUnitEntity> offers = getAllCategoryOffers(entity);
+        if(offers.size() == 0) {
+            entity.setPrice(null);
+        } else {
+            BigInteger sum = BigInteger.ZERO;
+            for(ShopUnitEntity offer : offers)
+                sum = sum.add(BigInteger.valueOf(offer.getPrice()));
+            sum = sum.divide(BigInteger.valueOf(offers.size()));
+            entity.setPrice(sum.longValue());
+        }
+    }
+
+    private List<ShopUnitEntity> getAllCategoryOffers(ShopUnitEntity category) {
+        List<ShopUnitEntity> childs = unitRepository.findAllByParent(category.getUnitId());
+        List<ShopUnitEntity> result = new ArrayList<>();
+        for(ShopUnitEntity child : childs) {
+            if(child.getType() == ShopUnitType.OFFER) {
+                result.add(child);
+            } else if(child.getType() == ShopUnitType.CATEGORY) {
+                List<ShopUnitEntity> subtree = getAllCategoryOffers(child);
+                result.addAll(subtree);
+            }
+        }
+        return result;
+    }
 
     public ShopUnitEntity toEntity(ShopUnitImportDto dto) {
         ShopUnitEntity entity = new ShopUnitEntity();

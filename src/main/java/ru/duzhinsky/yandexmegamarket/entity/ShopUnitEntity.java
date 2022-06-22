@@ -1,5 +1,6 @@
 package ru.duzhinsky.yandexmegamarket.entity;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,6 +9,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -43,4 +45,17 @@ public class ShopUnitEntity {
 
     @Column(name = "parent", nullable = true)
     private UUID parent;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ShopUnitEntity entity = (ShopUnitEntity) o;
+        return Objects.equals(id, entity.id) && Objects.equals(unitId, entity.unitId) && Objects.equals(name, entity.name) && Objects.equals(validFrom, entity.validFrom) && Objects.equals(validTill, entity.validTill) && Objects.equals(price, entity.price) && type == entity.type && Objects.equals(parent, entity.parent);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, unitId, name, validFrom, validTill, price, type, parent);
+    }
 }

@@ -7,10 +7,7 @@ import ru.duzhinsky.yandexmegamarket.dto.ShopUnitImportDto;
 import ru.duzhinsky.yandexmegamarket.dto.ShopUnitImportRequestDto;
 import ru.duzhinsky.yandexmegamarket.entity.ShopUnitEntity;
 import ru.duzhinsky.yandexmegamarket.entity.ShopUnitType;
-import ru.duzhinsky.yandexmegamarket.exceptions.ShopUnitTypeChangeException;
-import ru.duzhinsky.yandexmegamarket.exceptions.WrongParentDataException;
-import ru.duzhinsky.yandexmegamarket.exceptions.WrongDateFormatException;
-import ru.duzhinsky.yandexmegamarket.exceptions.WrongPriceValueException;
+import ru.duzhinsky.yandexmegamarket.exceptions.*;
 import ru.duzhinsky.yandexmegamarket.repository.ShopUnitRepository;
 
 import java.math.BigInteger;
@@ -32,16 +29,19 @@ public class ShopUnitImportsService {
             WrongDateFormatException,
             WrongParentDataException,
             WrongPriceValueException,
-            ShopUnitTypeChangeException
+            ShopUnitTypeChangeException,
+            ShopUnitDuplicateException
     {
         Date importDate = getDateFromDto(requestDto);
         Queue<ShopUnitImportDto> importQueue = new LinkedList<>();
         Set<ShopUnitEntity> categories = new HashSet<>();
         Set<String> idsSet = new HashSet<>();
-        requestDto.getItems().forEach(unitDto -> {
+        for(var unitDto : requestDto.getItems()) {
+            if(idsSet.contains(unitDto.getId()))
+                throw new ShopUnitDuplicateException();
             idsSet.add(unitDto.getId());
             importQueue.add(unitDto);
-        });
+        }
 
         while (!importQueue.isEmpty()) {
             ShopUnitImportDto node = importQueue.poll();
@@ -58,12 +58,14 @@ public class ShopUnitImportsService {
                     var parent = parentOpt.get();
                     if(parent.getType() == ShopUnitType.OFFER)
                         throw new WrongParentDataException();
-                    else
+                    else if(!node.getType().equals(ShopUnitType.CATEGORY.toString()))
                         categories.add(parent);
                 }
             }
             var entity = importNode(node, importDate);
             idsSet.remove(node.getId());
+            if(entity.getType() == ShopUnitType.CATEGORY)
+                categories.add(entity);
         }
 
         for(ShopUnitEntity entity : categories) {
@@ -88,7 +90,7 @@ public class ShopUnitImportsService {
                 throw new ShopUnitTypeChangeException();
             unitEntity.setValidTill(importDate);
             unitRepository.save(unitEntity);
-        };
+        }
         ShopUnitEntity newRecord = toEntity(node);
         newRecord.setValidFrom(importDate);
         return unitRepository.save(newRecord);

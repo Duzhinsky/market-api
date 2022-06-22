@@ -29,7 +29,8 @@ public class ShopUnitController {
             catch ( WrongDateFormatException |
                     WrongParentDataException |
                     WrongPriceValueException |
-                    ShopUnitTypeChangeException e) {
+                    ShopUnitTypeChangeException |
+                    ShopUnitDuplicateException e) {
                 return ResponseEntity.badRequest().body(new BadRequestDto("Validation Failed"));
             }
             catch (Exception e) {

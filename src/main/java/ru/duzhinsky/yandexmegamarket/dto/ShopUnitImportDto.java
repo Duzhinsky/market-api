@@ -4,9 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import ru.duzhinsky.yandexmegamarket.entity.ShopUnitEntity;
-import ru.duzhinsky.yandexmegamarket.entity.ShopUnitType;
-
-import java.util.UUID;
 
 @AllArgsConstructor
 @Getter @Setter
@@ -21,19 +18,10 @@ public class ShopUnitImportDto {
         ShopUnitImportDto dto = new ShopUnitImportDto(
                 entity.getUnitId().toString(),
                 entity.getName(),
-                entity.getParent() == null ? null : entity.getParent().getUnitId().toString(),
+                entity.getParent() == null ? null : entity.getParent().toString(),
                 entity.getType().toString(),
                 entity.getPrice()
         );
         return dto;
-    }
-
-    public static ShopUnitEntity toEntity(ShopUnitImportDto dto) {
-        ShopUnitEntity entity = new ShopUnitEntity();
-        entity.setUnitId(UUID.fromString(dto.getId()));
-        entity.setName(dto.getName());
-        entity.setType(ShopUnitType.valueOf(dto.getType()));
-        entity.setPrice(dto.getPrice());
-        return entity;
     }
 }

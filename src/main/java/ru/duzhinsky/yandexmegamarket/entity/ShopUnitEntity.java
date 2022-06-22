@@ -41,10 +41,6 @@ public class ShopUnitEntity {
     @Enumerated(EnumType.STRING)
     private ShopUnitType type;
 
-    @ManyToOne
-    @JoinColumn(name="parent")
-    private ShopUnitEntity parent;
-
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "parent")
-    private List<ShopUnitEntity> childrens;
+    @Column(name = "parent", nullable = true)
+    private UUID parent;
 }

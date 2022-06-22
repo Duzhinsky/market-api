@@ -1,12 +1,12 @@
 package ru.duzhinsky.yandexmegamarket.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.duzhinsky.yandexmegamarket.dto.ShopUnitImportDto;
 import ru.duzhinsky.yandexmegamarket.dto.ShopUnitImportRequestDto;
 import ru.duzhinsky.yandexmegamarket.entity.ShopUnitEntity;
+import ru.duzhinsky.yandexmegamarket.entity.ShopUnitType;
 import ru.duzhinsky.yandexmegamarket.exceptions.ShopUnitTypeChangeException;
 import ru.duzhinsky.yandexmegamarket.exceptions.WrongParentDataException;
 import ru.duzhinsky.yandexmegamarket.exceptions.WrongDateFormatException;
@@ -74,9 +74,25 @@ public class ShopUnitImportsService {
             unitEntity.setValidTill(importDate);
             unitRepository.save(unitEntity);
         };
-        ShopUnitEntity newRecord = ShopUnitImportDto.toEntity(node);
+        ShopUnitEntity newRecord = toEntity(node);
         newRecord.setValidFrom(importDate);
         unitRepository.save(newRecord);
+    }
+
+
+    public ShopUnitEntity toEntity(ShopUnitImportDto dto) {
+        ShopUnitEntity entity = new ShopUnitEntity();
+        entity.setUnitId(UUID.fromString(dto.getId()));
+        entity.setName(dto.getName());
+        entity.setType(ShopUnitType.valueOf(dto.getType()));
+        entity.setPrice(dto.getPrice());
+        if(dto.getParentId() != null) {
+            var parentOpt = unitRepository.findByUnitIdAndValidTillIsNull(
+                    UUID.fromString(dto.getParentId())
+            );
+            parentOpt.ifPresent(shopUnitEntity -> entity.setParent(shopUnitEntity.getUnitId()));
+        }
+        return entity;
     }
 
     private static Date getDateFromDto(ShopUnitImportRequestDto dto) throws WrongDateFormatException {

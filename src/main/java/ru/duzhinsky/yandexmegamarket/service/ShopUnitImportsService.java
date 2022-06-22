@@ -51,11 +51,11 @@ public class ShopUnitImportsService {
                     importQueue.add(node);
                     continue;
                 }
-                if(unitRepository.findLatestVersion( UUID.fromString(node.getId()) ).isEmpty())
+                if(unitRepository.findLatestVersion( UUID.fromString(node.getParentId()) ).isEmpty())
                     throw new WrongParentDataException();
             }
             importNode(node, importDate);
-            idsSet.remove(node.getParentId());
+            idsSet.remove(node.getId());
         }
 
     }

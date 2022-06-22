@@ -25,7 +25,7 @@ public class ShopUnitImportsService {
     @Autowired
     private ShopUnitRepository unitRepository;
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void importUnits(ShopUnitImportRequestDto requestDto)
             throws
             WrongDateFormatException,

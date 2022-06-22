@@ -7,6 +7,8 @@ import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -29,12 +31,10 @@ public class ShopUnitEntity {
     private String name;
 
     @Column(name = "valid_from", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date validFrom;
+    private LocalDateTime validFrom;
 
     @Column(name = "valid_till", nullable = true)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date validTill;
+    private LocalDateTime validTill;
 
     @Column(name = "price", nullable = true)
     private Long price;
@@ -51,11 +51,11 @@ public class ShopUnitEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ShopUnitEntity entity = (ShopUnitEntity) o;
-        return Objects.equals(id, entity.id) && Objects.equals(unitId, entity.unitId) && Objects.equals(name, entity.name) && Objects.equals(validFrom, entity.validFrom) && Objects.equals(validTill, entity.validTill) && Objects.equals(price, entity.price) && type == entity.type && Objects.equals(parent, entity.parent);
+        return Objects.equals(id, entity.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, unitId, name, validFrom, validTill, price, type, parent);
+        return Objects.hash(id);
     }
 }

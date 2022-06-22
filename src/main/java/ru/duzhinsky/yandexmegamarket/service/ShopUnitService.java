@@ -19,7 +19,7 @@ public class ShopUnitService {
     private ShopUnitRepository unitRepository;
 
     private List<ShopUnitEntity> getAllCategoryOffers(ShopUnitEntity category) {
-        List<ShopUnitEntity> childs = unitRepository.findAllByParent(category.getUnitId());
+        List<ShopUnitEntity> childs = unitRepository.findAllLatestByParent(category.getUnitId());
         List<ShopUnitEntity> result = new ArrayList<>();
         for(ShopUnitEntity child : childs) {
             if(child.getType() == ShopUnitType.OFFER) {

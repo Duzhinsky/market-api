@@ -1,5 +1,6 @@
 package ru.duzhinsky.yandexmegamarket.controller;
 
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,16 +9,21 @@ import ru.duzhinsky.yandexmegamarket.dto.BadRequestDto;
 import ru.duzhinsky.yandexmegamarket.dto.ShopUnitImportRequestDto;
 import ru.duzhinsky.yandexmegamarket.exceptions.*;
 import ru.duzhinsky.yandexmegamarket.service.ShopUnitDeleteService;
+import ru.duzhinsky.yandexmegamarket.service.ShopUnitGetService;
 import ru.duzhinsky.yandexmegamarket.service.ShopUnitImportsService;
 
 @RestController
 @RequestMapping("/")
+@Log
 public class ShopUnitController {
     @Autowired
-    ShopUnitImportsService importsService;
+    private ShopUnitImportsService importsService;
 
     @Autowired
-    ShopUnitDeleteService deleteService;
+    private ShopUnitDeleteService deleteService;
+
+    @Autowired
+    private ShopUnitGetService getService;
 
     @PostMapping("/imports")
     public WebAsyncTask<ResponseEntity> imports(@RequestBody ShopUnitImportRequestDto requestDto) {
@@ -25,6 +31,26 @@ public class ShopUnitController {
             try {
                 importsService.importUnits(requestDto);
                 return ResponseEntity.ok().build();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                return ResponseEntity.badRequest().body(new BadRequestDto("Validation Failed"));
+            }
+        });
+        task.onTimeout(() -> ResponseEntity.internalServerError().build());
+        task.onError(() -> ResponseEntity.internalServerError().build());
+        return task;
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public WebAsyncTask<ResponseEntity> delete(@PathVariable String id) {
+        WebAsyncTask<ResponseEntity> task = new WebAsyncTask<>(10000, () -> {
+            try {
+                deleteService.delete(id);
+                return ResponseEntity.ok().build();
+            }
+            catch (ShopUnitNotFoundException e) {
+                return ResponseEntity.status(404).body(new BadRequestDto("Item not found"));
             }
             catch (Exception e) {
                 return ResponseEntity.badRequest().body(new BadRequestDto("Validation Failed"));
@@ -35,17 +61,18 @@ public class ShopUnitController {
         return task;
     }
 
-    @DeleteMapping("/delete/{id}")
-    public WebAsyncTask<ResponseEntity> delete(@RequestParam String id) {
+    @GetMapping("/nodes/{id}")
+    public WebAsyncTask<ResponseEntity> get(@PathVariable String id) {
+        log.info("Request /nodes/{id} with id = " + id);
         WebAsyncTask<ResponseEntity> task = new WebAsyncTask<>(10000, () -> {
             try {
-                deleteService.delete(id);
-                return ResponseEntity.ok().build();
+                return ResponseEntity.ok().body(getService.get(id));
             }
             catch (ShopUnitNotFoundException e) {
-                return ResponseEntity.badRequest().body(new BadRequestDto("Item not found"));
+                return ResponseEntity.status(404).body(new BadRequestDto("Item not found"));
             }
             catch (Exception e) {
+                e.printStackTrace();
                 return ResponseEntity.badRequest().body(new BadRequestDto("Validation Failed"));
             }
         });

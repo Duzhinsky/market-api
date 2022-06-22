@@ -1,6 +1,7 @@
 package ru.duzhinsky.yandexmegamarket.service;
 
 import lombok.extern.java.Log;
+import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import ru.duzhinsky.yandexmegamarket.exceptions.*;
 import ru.duzhinsky.yandexmegamarket.repository.ShopUnitRepository;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAccessor;
@@ -36,9 +38,10 @@ public class ShopUnitImportsService {
             ShopUnitTypeChangeException,
             ShopUnitDuplicateException
     {
-        Date importDate = getDateFromDto(requestDto);
+        LocalDateTime importDate = getDateFromDto(requestDto);
+
         Queue<ShopUnitImportDto> importQueue = new LinkedList<>();
-        Set<ShopUnitEntity> categories = new HashSet<>();
+        Map<ShopUnitEntity, Boolean> isCategoryRefreshed = new HashMap<>();
         Set<String> idsSet = new HashSet<>();
         for(var unitDto : requestDto.getItems()) {
             if(idsSet.contains(unitDto.getId()))
@@ -63,34 +66,49 @@ public class ShopUnitImportsService {
                     if(parent.getType() == ShopUnitType.OFFER)
                         throw new WrongParentDataException();
                     else
-                        categories.add(parent);
+                        isCategoryRefreshed.put(parent, false);
                 }
             }
             var entity = importNode(node, importDate);
             idsSet.remove(node.getId());
             if(entity.getType() == ShopUnitType.CATEGORY)
-                categories.add(entity);
+                isCategoryRefreshed.put(entity, false);
         }
 
-        for(ShopUnitEntity entity : categories) {
-            updateCategory(entity);
+        var keyset = Set.copyOf(isCategoryRefreshed.keySet());
+        for(ShopUnitEntity entity : keyset) {
+            updateCategory(entity, importDate, isCategoryRefreshed);
         }
     }
 
-    private void updateCategory(ShopUnitEntity entity) {
+    private void updateCategory(ShopUnitEntity entity, LocalDateTime date, Map<ShopUnitEntity, Boolean> visited) {
+        if(visited.get(entity)) return;
         Long price = shopUnitService.calculateAveragePriceForCategory(entity);
-        entity.setPrice(price);
+        entity.setValidTill(date);
         unitRepository.save(entity);
+
+        ShopUnitEntity newEntity = new ShopUnitEntity();
+        newEntity.setUnitId(entity.getUnitId());
+        newEntity.setParent(entity.getParent());
+        newEntity.setType(entity.getType());
+        newEntity.setName(entity.getName());
+        newEntity.setPrice(price);
+        newEntity.setValidFrom(date);
+        unitRepository.save(newEntity);
+        visited.put(entity, true);
+        entity.setPrice(price);
         if(entity.getParent() != null) {
             var parentOpt = unitRepository.findLatestVersion(entity.getParent());
-            if(parentOpt.isPresent()) {
-                var parent = parentOpt.get();
-                updateCategory(parent);
-            }
+            parentOpt.ifPresent(parent -> {
+                if(!(visited.containsKey(parent) && visited.get(parent))) {
+                    visited.put(parent, false);
+                    updateCategory(parent, date, visited);
+                }
+            });
         }
     }
 
-    private ShopUnitEntity importNode(ShopUnitImportDto node, Date importDate)
+    private ShopUnitEntity importNode(ShopUnitImportDto node, LocalDateTime importDate)
             throws
             WrongPriceValueException,
             ShopUnitTypeChangeException
@@ -127,11 +145,9 @@ public class ShopUnitImportsService {
         return entity;
     }
 
-    private static Date getDateFromDto(ShopUnitImportRequestDto dto) throws WrongDateFormatException {
+    private static LocalDateTime getDateFromDto(ShopUnitImportRequestDto dto) throws WrongDateFormatException {
         try {
-            TemporalAccessor ta = DateTimeFormatter.ISO_INSTANT.parse(dto.getUpdateDate());
-            Instant i = Instant.from(ta);
-            return Date.from(i);
+            return LocalDateTime.parse(dto.getUpdateDate(), DateTimeFormatter.ISO_DATE_TIME);
         } catch(DateTimeParseException e) {
             throw new WrongDateFormatException("Date format does not fits iso 8601");
         }

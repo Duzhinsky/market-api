@@ -23,6 +23,9 @@ public class ShopUnitImportsService {
     @Autowired
     private ShopUnitRepository unitRepository;
 
+    @Autowired
+    private ShopUnitService shopUnitService;
+
     @Transactional(rollbackFor = Exception.class)
     public void importUnits(ShopUnitImportRequestDto requestDto)
             throws
@@ -69,7 +72,8 @@ public class ShopUnitImportsService {
         }
 
         for(ShopUnitEntity entity : categories) {
-            calculateAveragePriceForCategory(entity);
+            Long price = shopUnitService.calculateAveragePriceForCategory(entity);
+            entity.setPrice(price);
             unitRepository.save(entity);
         }
     }
@@ -94,33 +98,6 @@ public class ShopUnitImportsService {
         ShopUnitEntity newRecord = toEntity(node);
         newRecord.setValidFrom(importDate);
         return unitRepository.save(newRecord);
-    }
-
-    private void calculateAveragePriceForCategory(ShopUnitEntity entity) {
-        List<ShopUnitEntity> offers = getAllCategoryOffers(entity);
-        if(offers.size() == 0) {
-            entity.setPrice(null);
-        } else {
-            BigInteger sum = BigInteger.ZERO;
-            for(ShopUnitEntity offer : offers)
-                sum = sum.add(BigInteger.valueOf(offer.getPrice()));
-            sum = sum.divide(BigInteger.valueOf(offers.size()));
-            entity.setPrice(sum.longValue());
-        }
-    }
-
-    private List<ShopUnitEntity> getAllCategoryOffers(ShopUnitEntity category) {
-        List<ShopUnitEntity> childs = unitRepository.findAllByParent(category.getUnitId());
-        List<ShopUnitEntity> result = new ArrayList<>();
-        for(ShopUnitEntity child : childs) {
-            if(child.getType() == ShopUnitType.OFFER) {
-                result.add(child);
-            } else if(child.getType() == ShopUnitType.CATEGORY) {
-                List<ShopUnitEntity> subtree = getAllCategoryOffers(child);
-                result.addAll(subtree);
-            }
-        }
-        return result;
     }
 
     public ShopUnitEntity toEntity(ShopUnitImportDto dto) {

@@ -44,10 +44,10 @@ public class ShopUnitController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public WebAsyncTask<ResponseEntity> delete(@RequestParam String uuid) {
+    public WebAsyncTask<ResponseEntity> delete(@RequestParam String id) {
         WebAsyncTask<ResponseEntity> task = new WebAsyncTask<>(10000, () -> {
             try {
-                deleteService.delete(uuid);
+                deleteService.delete(id);
                 return ResponseEntity.ok().build();
             }
             catch (UUIDFormatException e) {

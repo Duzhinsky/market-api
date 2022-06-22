@@ -1,19 +1,24 @@
 package ru.duzhinsky.yandexmegamarket;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import ru.duzhinsky.yandexmegamarket.dto.ShopUnitImportDto;
 import ru.duzhinsky.yandexmegamarket.dto.ShopUnitImportRequestDto;
+import ru.duzhinsky.yandexmegamarket.entity.ShopUnitType;
 import ru.duzhinsky.yandexmegamarket.repository.ShopUnitRepository;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.UUID;
+import java.util.*;
 
+@ExtendWith(SpringExtension.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class DeleteTests {
     @Autowired
     private TestRestTemplate restTemplate;
@@ -41,7 +46,16 @@ public class DeleteTests {
         Assert.isTrue(response.getStatusCode() == HttpStatus.NOT_FOUND, "Status code should be 404");
         Assert.isTrue(response.getBody() != null, "Response should have body");
         LinkedHashMap<String, Object> body = (LinkedHashMap<String, Object>)response.getBody();
-        Assert.isTrue("Not found".equals(body.get("message")), "Message should be like \"Validation Failed\"");
+        Assert.isTrue("Item not found".equals(body.get("message")), "Message should be like \"Item not found\"");
         Assert.isTrue(Integer.valueOf(404).equals(body.get("code")), "Message code should be equal 404");
+    }
+
+    @Test
+    public void askForNonExistent() {
+        List<ShopUnitImportDto> items = new ArrayList<>();
+        String id = UUID.randomUUID().toString();
+        HttpEntity e = new HttpEntity(new LinkedHashMap<String, Object>());
+        ResponseEntity<Object> response  = restTemplate.exchange("/delete/"+id, HttpMethod.DELETE, e, Object.class);
+        isNotFoundResponse(response);
     }
 }

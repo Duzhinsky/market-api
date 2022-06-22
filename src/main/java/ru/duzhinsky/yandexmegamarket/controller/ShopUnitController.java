@@ -33,7 +33,7 @@ public class ShopUnitController {
                 return ResponseEntity.ok().build();
             }
             catch (Exception e) {
-                return ResponseEntity.badRequest().body(new BadRequestDto("Validation Failed"));
+                return ResponseEntity.badRequest().body(new BadRequestDto(400,"Validation Failed"));
             }
         });
         task.onTimeout(() -> ResponseEntity.internalServerError().build());
@@ -49,10 +49,10 @@ public class ShopUnitController {
                 return ResponseEntity.ok().build();
             }
             catch (ShopUnitNotFoundException e) {
-                return ResponseEntity.status(404).body(new BadRequestDto("Item not found"));
+                return ResponseEntity.status(404).body(new BadRequestDto(404,"Item not found"));
             }
             catch (Exception e) {
-                return ResponseEntity.badRequest().body(new BadRequestDto("Validation Failed"));
+                return ResponseEntity.badRequest().body(new BadRequestDto(400,"Validation Failed"));
             }
         });
         task.onTimeout(() -> ResponseEntity.internalServerError().build());
@@ -68,10 +68,10 @@ public class ShopUnitController {
                 return ResponseEntity.ok().body(getService.get(id));
             }
             catch (ShopUnitNotFoundException e) {
-                return ResponseEntity.status(404).body(new BadRequestDto("Item not found"));
+                return ResponseEntity.status(404).body(new BadRequestDto(404,"Item not found"));
             }
             catch (Exception e) {
-                return ResponseEntity.badRequest().body(new BadRequestDto("Validation Failed"));
+                return ResponseEntity.badRequest().body(new BadRequestDto(400, "Validation Failed"));
             }
         });
         task.onTimeout(() -> ResponseEntity.internalServerError().build());

@@ -7,6 +7,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter @Setter
 public class BadRequestDto {
-    private final int code = 400;
+    private int code;
     private String message;
 }

@@ -16,7 +16,6 @@ public class ControllerConfig {
     @Bean
     public ErrorAttributes errorAttributes() {
         return new DefaultErrorAttributes() {
-
             @Override
             public Map<String ,Object> getErrorAttributes(
                     WebRequest webRequest

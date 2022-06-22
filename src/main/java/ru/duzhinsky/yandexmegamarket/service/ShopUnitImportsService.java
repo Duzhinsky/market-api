@@ -11,7 +11,6 @@ import ru.duzhinsky.yandexmegamarket.entity.ShopUnitType;
 import ru.duzhinsky.yandexmegamarket.exceptions.*;
 import ru.duzhinsky.yandexmegamarket.repository.ShopUnitRepository;
 
-import java.math.BigInteger;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -63,6 +62,8 @@ public class ShopUnitImportsService {
                     var parent = parentOpt.get();
                     if(parent.getType() == ShopUnitType.OFFER)
                         throw new WrongParentDataException();
+                    else
+                        categories.add(parent);
                 }
             }
             var entity = importNode(node, importDate);

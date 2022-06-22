@@ -1,5 +1,6 @@
 package ru.duzhinsky.yandexmegamarket.service;
 
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.duzhinsky.yandexmegamarket.entity.ShopUnitEntity;
@@ -9,8 +10,10 @@ import ru.duzhinsky.yandexmegamarket.repository.ShopUnitRepository;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@Log
 public class ShopUnitService {
     @Autowired
     private ShopUnitRepository unitRepository;
@@ -31,6 +34,8 @@ public class ShopUnitService {
 
     public Long calculateAveragePriceForCategory(ShopUnitEntity category) {
         List<ShopUnitEntity> offers = getAllCategoryOffers(category);
+        var a = offers.stream().map(ShopUnitEntity::getPrice).map(l->l.toString()).collect(Collectors.joining(" "));
+        log.info(category.getName() + ": " + a);
         if(offers.size() == 0) {
             return null;
         } else {

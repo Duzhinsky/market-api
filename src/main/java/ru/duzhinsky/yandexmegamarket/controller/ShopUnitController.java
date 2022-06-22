@@ -26,16 +26,8 @@ public class ShopUnitController {
                 importsService.importUnits(requestDto);
                 return ResponseEntity.ok().build();
             }
-            catch ( WrongDateFormatException |
-                    WrongParentDataException |
-                    WrongPriceValueException |
-                    ShopUnitTypeChangeException |
-                    ShopUnitDuplicateException e) {
-                return ResponseEntity.badRequest().body(new BadRequestDto("Validation Failed"));
-            }
             catch (Exception e) {
-                e.printStackTrace();
-                return ResponseEntity.internalServerError().build();
+                return ResponseEntity.badRequest().body(new BadRequestDto("Validation Failed"));
             }
         });
         task.onTimeout(() -> ResponseEntity.internalServerError().build());
@@ -50,15 +42,11 @@ public class ShopUnitController {
                 deleteService.delete(id);
                 return ResponseEntity.ok().build();
             }
-            catch (UUIDFormatException e) {
-                return ResponseEntity.badRequest().body(new BadRequestDto("Validation Failed"));
-            }
             catch (ShopUnitNotFoundException e) {
                 return ResponseEntity.badRequest().body(new BadRequestDto("Item not found"));
             }
             catch (Exception e) {
-                e.printStackTrace();
-                return ResponseEntity.internalServerError().build();
+                return ResponseEntity.badRequest().body(new BadRequestDto("Validation Failed"));
             }
         });
         task.onTimeout(() -> ResponseEntity.internalServerError().build());

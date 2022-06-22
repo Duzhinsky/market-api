@@ -9,7 +9,6 @@ import ru.duzhinsky.yandexmegamarket.repository.ShopUnitRepository;
 
 import java.util.UUID;
 
-
 @Service
 public class ShopUnitDeleteService {
 

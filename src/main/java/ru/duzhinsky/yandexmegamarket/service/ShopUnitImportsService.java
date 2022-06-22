@@ -1,5 +1,6 @@
 package ru.duzhinsky.yandexmegamarket.service;
 
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ import java.time.temporal.TemporalAccessor;
 import java.util.*;
 
 @Service
+@Log
 public class ShopUnitImportsService {
 
     @Autowired
@@ -61,8 +63,6 @@ public class ShopUnitImportsService {
                     var parent = parentOpt.get();
                     if(parent.getType() == ShopUnitType.OFFER)
                         throw new WrongParentDataException();
-                    else if(!node.getType().equals(ShopUnitType.CATEGORY.toString()))
-                        categories.add(parent);
                 }
             }
             var entity = importNode(node, importDate);
@@ -72,9 +72,20 @@ public class ShopUnitImportsService {
         }
 
         for(ShopUnitEntity entity : categories) {
-            Long price = shopUnitService.calculateAveragePriceForCategory(entity);
-            entity.setPrice(price);
-            unitRepository.save(entity);
+            updateCategory(entity);
+        }
+    }
+
+    private void updateCategory(ShopUnitEntity entity) {
+        Long price = shopUnitService.calculateAveragePriceForCategory(entity);
+        entity.setPrice(price);
+        unitRepository.save(entity);
+        if(entity.getParent() != null) {
+            var parentOpt = unitRepository.findLatestVersion(entity.getParent());
+            if(parentOpt.isPresent()) {
+                var parent = parentOpt.get();
+                updateCategory(parent);
+            }
         }
     }
 

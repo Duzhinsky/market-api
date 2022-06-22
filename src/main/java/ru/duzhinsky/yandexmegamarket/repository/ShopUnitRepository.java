@@ -17,4 +17,8 @@ public interface ShopUnitRepository extends CrudRepository<ShopUnitEntity, UUID>
         return findByUnitIdAndValidTillIsNull(id);
     }
     List<ShopUnitEntity> findAllByParent(UUID parentId);
+    List<ShopUnitEntity> findAllByParentAndValidTillIsNull(UUID parentId);
+    default List<ShopUnitEntity> findAllLatestByParent(UUID parentId) {
+        return findAllByParentAndValidTillIsNull(parentId);
+    }
 }

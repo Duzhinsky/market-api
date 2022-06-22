@@ -12,7 +12,7 @@ import java.util.UUID;
 public interface ShopUnitRepository extends CrudRepository<ShopUnitEntity, UUID> {
     Optional<ShopUnitEntity> findByUnitIdAndValidTillIsNull(UUID id);
     List<ShopUnitEntity> findAllByUnitId(UUID unitId);
-
+    void deleteAllByUnitId(UUID unitId);
     default Optional<ShopUnitEntity> findLatestVersion(UUID id) {
         return findByUnitIdAndValidTillIsNull(id);
     }

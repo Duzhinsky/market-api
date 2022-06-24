@@ -10,9 +10,8 @@ import org.springframework.http.*;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
-import ru.duzhinsky.yandexmegamarket.dto.ShopUnitImportDto;
-import ru.duzhinsky.yandexmegamarket.dto.ShopUnitImportRequestDto;
-import ru.duzhinsky.yandexmegamarket.entity.ShopUnitType;
+import ru.duzhinsky.yandexmegamarket.dto.objects.ShopUnitImport;
+import ru.duzhinsky.yandexmegamarket.dto.objects.ShopUnitImportRequest;
 import ru.duzhinsky.yandexmegamarket.repository.ShopUnitRepository;
 
 import java.util.*;
@@ -31,14 +30,14 @@ public class DeleteTests {
         unitRepository.deleteAll();
     }
 
-    private ResponseEntity<Object> testSuccessfullInsetion(ShopUnitImportRequestDto requestDto) {
+    private ResponseEntity<Object> testSuccessfullInsetion(ShopUnitImportRequest requestDto) {
         MultiValueMap<String, String> headers = new HttpHeaders();
         headers.add("Content-Type", "application/json");
-        HttpEntity<ShopUnitImportRequestDto> requestEntity = new HttpEntity<>(requestDto, headers);
+        HttpEntity<ShopUnitImportRequest> requestEntity = new HttpEntity<>(requestDto, headers);
         ResponseEntity<Object> response = restTemplate.exchange("/imports", HttpMethod.POST, requestEntity, Object.class, new HashMap<String, String>());
         Assert.isTrue(response.getStatusCode() == HttpStatus.OK, "Status code should be OK - 200");
-        for(ShopUnitImportDto ent : requestDto.getItems())
-            Assert.isTrue(unitRepository.findLatestVersion(UUID.fromString(ent.getId())).isPresent(), "Entities should be created");
+        for(ShopUnitImport ent : requestDto.getItems())
+            Assert.isTrue(unitRepository.findById(UUID.fromString(ent.getId())).isPresent(), "Entities should be created");
         return response;
     }
 
@@ -52,7 +51,7 @@ public class DeleteTests {
 
     @Test
     public void askForNonExistent() {
-        List<ShopUnitImportDto> items = new ArrayList<>();
+        List<ShopUnitImport> items = new ArrayList<>();
         String id = UUID.randomUUID().toString();
         HttpEntity e = new HttpEntity(new LinkedHashMap<String, Object>());
         ResponseEntity<Object> response  = restTemplate.exchange("/delete/"+id, HttpMethod.DELETE, e, Object.class);

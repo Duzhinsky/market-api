@@ -1,4 +1,4 @@
-package ru.duzhinsky.yandexmegamarket;
+package ru.duzhinsky.yandexmegamarket.config;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -12,7 +12,6 @@ import org.springframework.web.context.request.WebRequest;
 
 @Configuration
 public class ControllerConfig {
-
     @Bean
     public ErrorAttributes errorAttributes() {
         return new DefaultErrorAttributes() {

@@ -1,4 +1,4 @@
-package ru.duzhinsky.yandexmegamarket.exceptions;
+package ru.duzhinsky.yandexmegamarket.exception;
 
 public class WrongParentDataException extends Exception {
     public WrongParentDataException() {

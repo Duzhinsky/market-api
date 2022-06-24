@@ -7,18 +7,21 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
-
 
 @Getter @Setter
 @NoArgsConstructor
 @Entity
-@Table(name="shop_unit")
-public class ShopUnitEntity {
+@Table(name = "shop_unit_history")
+public class ShopUnitHistoryEntity {
     @Id
+    @GenericGenerator(name = "UUIDGenerator", strategy = "uuid2")
+    @GeneratedValue(generator = "UUIDGenerator")
     @Column(name = "id")
     private UUID id;
+
+    @Column(name="unit_id", nullable = false)
+    private UUID unitId;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -32,14 +35,4 @@ public class ShopUnitEntity {
 
     @Column(name = "date", nullable = false)
     private LocalDateTime updateDate;
-
-    @JoinColumn(name = "parent", referencedColumnName = "id")
-    @ManyToOne(fetch = FetchType.LAZY)
-    private ShopUnitEntity parent;
-
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<ShopUnitEntity> childrens;
-
-    @OneToOne(mappedBy = "category", fetch = FetchType.LAZY)
-    private ShopCategoryMetaEntity metadata;
 }

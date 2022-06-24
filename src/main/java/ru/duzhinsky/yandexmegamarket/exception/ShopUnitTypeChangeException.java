@@ -1,4 +1,4 @@
-package ru.duzhinsky.yandexmegamarket.exceptions;
+package ru.duzhinsky.yandexmegamarket.exception;
 
 public class ShopUnitTypeChangeException extends Exception {
     public ShopUnitTypeChangeException() {

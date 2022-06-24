@@ -1,4 +1,4 @@
-package ru.duzhinsky.yandexmegamarket;
+package ru.duzhinsky.yandexmegamarket.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
@@ -16,7 +16,7 @@ public class SpringAsyncConfig implements AsyncConfigurer {
         executor.setCorePoolSize(10);
         executor.setMaxPoolSize(50);
         executor.setQueueCapacity(30);
-        executor.setThreadNamePrefix("DemoExecutor-");
+        executor.setThreadNamePrefix("executor-");
         executor.initialize();
         return executor;
     }

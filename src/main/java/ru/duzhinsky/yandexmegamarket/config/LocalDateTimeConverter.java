@@ -1,4 +1,4 @@
-package ru.duzhinsky.yandexmegamarket;
+package ru.duzhinsky.yandexmegamarket.config;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;

@@ -13,6 +13,8 @@ import org.springframework.util.MultiValueMap;
 import ru.duzhinsky.yandexmegamarket.dto.objects.ShopUnitImport;
 import ru.duzhinsky.yandexmegamarket.dto.objects.ShopUnitImportRequest;
 import ru.duzhinsky.yandexmegamarket.entity.ShopUnitType;
+import ru.duzhinsky.yandexmegamarket.repository.ShopCategoryMetaRepository;
+import ru.duzhinsky.yandexmegamarket.repository.ShopUnitHistoryRepository;
 import ru.duzhinsky.yandexmegamarket.repository.ShopUnitRepository;
 
 import java.util.*;
@@ -25,6 +27,10 @@ public class PostImportTests {
 
     @Autowired
     private ShopUnitRepository unitRepository;
+    @Autowired
+    private ShopUnitHistoryRepository historyRepository;
+    @Autowired
+    private ShopCategoryMetaRepository metaRepository;
 
     private void isBadRequestResponseForInvalid(ResponseEntity<Object> response) {
         Assert.isTrue(response.getStatusCode() == HttpStatus.BAD_REQUEST, "Status code should be 400");
@@ -57,7 +63,9 @@ public class PostImportTests {
 
     @AfterEach
     public void clearDb() {
-//         unitRepository.deleteAll();
+        historyRepository.deleteAll();
+        metaRepository.deleteAll();
+        unitRepository.deleteAll();
     }
 
     @Test
@@ -484,15 +492,19 @@ public class PostImportTests {
         Assert.isTrue(rootOpt.isPresent(), "Root should present");
         Assert.isTrue(rootOpt.get().getPrice().equals(250L), "Av price is 250");
 
+        var cat1Opt = unitRepository.findById((UUID.fromString("1e1079ba-f285-11ec-b939-0242ac120002")));
+        Assert.isTrue(cat1Opt.isPresent(), "Category 1 should present");
+        Assert.isTrue(cat1Opt.get().getPrice().equals(100L), "Category 1 price should be 100");
+
         List<ShopUnitImport> batch2 = new ArrayList<>();
-        batch1.add(new ShopUnitImport(
+        batch2.add(new ShopUnitImport(
                 "69bd992e-f285-11ec-b939-0242ac120002",
                 "Off 1",
                 "38a129e6-f285-11ec-b939-0242ac120002",
                 ShopUnitType.OFFER.toString(),
                 100L
         ));
-        batch1.add(new ShopUnitImport(
+        batch2.add(new ShopUnitImport(
                 "59149b86-f285-11ec-b939-0242ac120002",
                 "Off 2",
                 "1e1079ba-f285-11ec-b939-0242ac120002",
@@ -502,7 +514,7 @@ public class PostImportTests {
         requestDto = new ShopUnitImportRequest(batch2, "2022-02-05T15:00:00.000Z");
         testSuccessfullInsetion(requestDto);
 
-        var cat1Opt = unitRepository.findById((UUID.fromString("1e1079ba-f285-11ec-b939-0242ac120002")));
+        cat1Opt = unitRepository.findById((UUID.fromString("1e1079ba-f285-11ec-b939-0242ac120002")));
         Assert.isTrue(cat1Opt.isPresent(), "Category 1 should present");
         Assert.isTrue(cat1Opt.get().getPrice().equals(400L), "Category 1 av price should change");
     }

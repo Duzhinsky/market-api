@@ -20,7 +20,7 @@ public class ShopUnitController {
 
     @PostMapping("/imports")
     public WebAsyncTask<ResponseEntity> imports(@RequestBody ShopUnitImportRequest requestDto) {
-        WebAsyncTask<ResponseEntity> task = new WebAsyncTask<>(10000, () -> {
+        WebAsyncTask<ResponseEntity> task = new WebAsyncTask<>(50000, () -> {
             try {
                 unitService.importUnits(requestDto);
                 return ResponseEntity.ok().build();

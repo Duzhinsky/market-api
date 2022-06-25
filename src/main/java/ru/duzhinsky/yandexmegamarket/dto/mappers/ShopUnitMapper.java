@@ -1,7 +1,6 @@
 package ru.duzhinsky.yandexmegamarket.dto.mappers;
 
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import ru.duzhinsky.yandexmegamarket.dto.objects.ShopUnitDto;
 import ru.duzhinsky.yandexmegamarket.dto.objects.ShopUnitImport;
 import ru.duzhinsky.yandexmegamarket.dto.objects.ShopUnitImportRequest;
@@ -22,7 +21,7 @@ public class ShopUnitMapper {
 
     public static void validateImportDto(ShopUnitImport dto)
             throws WrongNameException,
-            WrongUnitTypeException,
+            UnknownUnitTypeException,
             WrongPriceValueException,
             WrongIdValueException,
             WrongParentDataException
@@ -39,7 +38,7 @@ public class ShopUnitMapper {
             if(dto.getPrice() == null || dto.getPrice() < 0L)
                 throw new WrongPriceValueException();
         } else {
-            throw new WrongUnitTypeException();
+            throw new UnknownUnitTypeException();
         }
 
         if(dto.getParentId() != null && dto.getParentId().equals(dto.getId()))

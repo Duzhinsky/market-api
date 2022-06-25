@@ -20,13 +20,12 @@ public class ShopUnitController {
 
     @PostMapping("/imports")
     public WebAsyncTask<ResponseEntity> imports(@RequestBody ShopUnitImportRequest requestDto) {
-        WebAsyncTask<ResponseEntity> task = new WebAsyncTask<>(50000, () -> {
+        WebAsyncTask<ResponseEntity> task = new WebAsyncTask<>(10000, () -> {
             try {
                 unitService.importUnits(requestDto);
                 return ResponseEntity.ok().build();
             }
-            catch (Exception e) {
-                e.printStackTrace();
+            catch (BadRequestException e) {
                 return ResponseEntity.badRequest().body(new ResponseMessage(400,"Validation Failed"));
             }
         });
@@ -45,7 +44,7 @@ public class ShopUnitController {
             catch (ShopUnitNotFoundException e) {
                 return ResponseEntity.status(404).body(new ResponseMessage(404,"Item not found"));
             }
-            catch (Exception e) {
+            catch (BadRequestException e) {
                 return ResponseEntity.badRequest().body(new ResponseMessage(400,"Validation Failed"));
             }
         });
@@ -64,7 +63,7 @@ public class ShopUnitController {
             catch (ShopUnitNotFoundException e) {
                 return ResponseEntity.status(404).body(new ResponseMessage(404,"Item not found"));
             }
-            catch (Exception e) {
+            catch (BadRequestException e) {
                 return ResponseEntity.badRequest().body(new ResponseMessage(400, "Validation Failed"));
             }
         });

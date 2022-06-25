@@ -40,7 +40,7 @@ public class ShopUnitService {
     @Transactional(rollbackFor = Exception.class)
     public void importUnits(ShopUnitImportRequest requestDto)
             throws WrongDateFormatException,
-            WrongUnitTypeException,
+            UnknownUnitTypeException,
             WrongNameException,
             WrongIdValueException,
             WrongPriceValueException,
@@ -81,13 +81,13 @@ public class ShopUnitService {
     @Async
     protected void insertNodes(ShopUnitImport node, Map<String, List<ShopUnitImport>> childrens, Set<ShopUnitEntity> categoriesPool, LocalDateTime date)
             throws WrongParentDataException,
-            WrongUnitTypeException
+            UnknownUnitTypeException
     {
         log.info("Insert node: " + node.getName());
 
         var storedOptional = unitRepository.findById(UUID.fromString(node.getId()));
         if(storedOptional.isPresent() && !storedOptional.get().getType().toString().equals(node.getType()))
-            throw new WrongUnitTypeException();
+            throw new UnknownUnitTypeException();
 
         ShopUnitEntity entity = storedOptional.orElseGet(ShopUnitEntity::new);
 

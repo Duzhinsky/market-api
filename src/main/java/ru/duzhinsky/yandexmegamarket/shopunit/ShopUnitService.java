@@ -9,6 +9,7 @@ import ru.duzhinsky.yandexmegamarket.shopunit.dto.mappers.ShopUnitMapper;
 import ru.duzhinsky.yandexmegamarket.shopunit.dto.objects.ShopUnitDto;
 import ru.duzhinsky.yandexmegamarket.shopunit.dto.objects.ShopUnitImport;
 import ru.duzhinsky.yandexmegamarket.shopunit.dto.objects.ShopUnitImportRequest;
+import ru.duzhinsky.yandexmegamarket.shopunit.dto.objects.StatisticResponse;
 import ru.duzhinsky.yandexmegamarket.shopunit.entity.ShopCategoryMetaEntity;
 import ru.duzhinsky.yandexmegamarket.shopunit.entity.ShopUnitEntity;
 import ru.duzhinsky.yandexmegamarket.shopunit.entity.ShopUnitHistoryEntity;
@@ -89,8 +90,7 @@ public class ShopUnitService {
                         entity.getParent(),
                         entity.getMetadata().getTotalPrice().negate(),
                         entity.getMetadata().getOffersCount().negate(),
-                        categoriesPool,
-                        date
+                        categoriesPool
                 );
             }
             if(node.getParentId() != null) {
@@ -104,8 +104,7 @@ public class ShopUnitService {
                             parentOptional.get(),
                             entity.getMetadata().getTotalPrice(),
                             entity.getMetadata().getOffersCount(),
-                            categoriesPool,
-                            date
+                            categoriesPool
                     );
                 }
             }
@@ -120,8 +119,7 @@ public class ShopUnitService {
                         entity.getParent(),
                         BigInteger.valueOf(-entity.getPrice()),
                         BigInteger.ONE.negate(),
-                        categoriesPool,
-                        date
+                        categoriesPool
                 );
                 priceDifference = node.getPrice();
                 theSame = false;
@@ -139,8 +137,7 @@ public class ShopUnitService {
                         entity.getParent(),
                         BigInteger.valueOf(priceDifference),
                         theSame ? BigInteger.ZERO : BigInteger.ONE,
-                        categoriesPool,
-                        date
+                        categoriesPool
                 );
             }
         }
@@ -150,8 +147,11 @@ public class ShopUnitService {
         if(entity.getType() == ShopUnitType.OFFER) {
             var history = ShopUnitMapper.toHistoryEntity(entity, date);
             historyRepository.save(history);
-        } else if(entity.getType() == ShopUnitType.CATEGORY)
+        } else if(entity.getType() == ShopUnitType.CATEGORY) {
+            if(categoriesPool.contains(entity))
+                categoriesPool.remove(entity);
             categoriesPool.add(entity);
+        }
 
         var childsList = childrens.get(node.getId());
         for(ShopUnitImport child : childsList)
@@ -169,8 +169,12 @@ public class ShopUnitService {
             deleteNode(node);
 
             Set<ShopUnitEntity> categoriesPool = new HashSet<>();
-            if(node.getParent() != null)
-                changeCategoryPrice(node.getParent(), BigInteger.valueOf(node.getPrice()), BigInteger.valueOf(-1L), categoriesPool, null);
+            if(node.getParent() != null) {
+                if(node.getType() == ShopUnitType.OFFER)
+                    changeCategoryPrice(node.getParent(), BigInteger.valueOf(-node.getPrice()), BigInteger.valueOf(-1L), categoriesPool);
+                else if(node.getType() == ShopUnitType.CATEGORY)
+                    changeCategoryPrice(node.getParent(), node.getMetadata().getTotalPrice().negate(), node.getMetadata().getOffersCount().negate(), categoriesPool);
+            }
             saveCategoriesPool(categoriesPool, null);
         } catch (IllegalArgumentException e) {
             throw new UUIDFormatException();
@@ -197,8 +201,28 @@ public class ShopUnitService {
         }
     }
 
-    private void changeCategoryPrice(ShopUnitEntity category, BigInteger priceChange, BigInteger countChange, Set<ShopUnitEntity> categoriesPool, LocalDateTime date) {
+    @Transactional(rollbackFor = Exception.class)
+    public StatisticResponse sales(String date) {
+        try {
+            return new StatisticResponse();
+        } catch (IllegalArgumentException e) {
+            throw new UUIDFormatException();
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public StatisticResponse statistics(String uuid, String start, String end) {
+        try {
+            return new StatisticResponse();
+        } catch (IllegalArgumentException e) {
+            throw new UUIDFormatException();
+        }
+    }
+
+    private void changeCategoryPrice(ShopUnitEntity category, BigInteger priceChange, BigInteger countChange, Set<ShopUnitEntity> categoriesPool) {
         log.info("change category " + category.getName());
+        if(categoriesPool.contains(category))
+            categoriesPool.remove(category);
         categoriesPool.add(category);
         ShopCategoryMetaEntity meta = null;
         if(category.getMetadata() == null) {
@@ -218,7 +242,7 @@ public class ShopUnitService {
             avPrice = meta.getTotalPrice().divide(meta.getOffersCount()).longValue();
         category.setPrice(avPrice);
         if(category.getParent() != null)
-            changeCategoryPrice(category.getParent(), priceChange, countChange, categoriesPool, date);
+            changeCategoryPrice(category.getParent(), priceChange, countChange, categoriesPool);
     }
 
     private void saveCategoriesPool(Set<ShopUnitEntity> categoriesPool, LocalDateTime date) {

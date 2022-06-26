@@ -8,6 +8,7 @@ import org.springframework.web.context.request.async.WebAsyncTask;
 import ru.duzhinsky.yandexmegamarket.dto.ResponseMessage;
 import ru.duzhinsky.yandexmegamarket.shopunit.dto.objects.ShopUnitImportRequest;
 import ru.duzhinsky.yandexmegamarket.shopunit.ShopUnitService;
+import ru.duzhinsky.yandexmegamarket.shopunit.dto.objects.StatisticResponse;
 import ru.duzhinsky.yandexmegamarket.shopunit.exception.BadRequestException;
 import ru.duzhinsky.yandexmegamarket.shopunit.exception.ShopUnitNotFoundException;
 
@@ -56,8 +57,7 @@ public class RestController {
     }
 
     @GetMapping("/nodes/{id}")
-    public WebAsyncTask<ResponseEntity>
-    get(@PathVariable String id) {
+    public WebAsyncTask<ResponseEntity> get(@PathVariable String id) {
         log.info("Request /nodes/{id} with id = " + id);
         WebAsyncTask<ResponseEntity> task = new WebAsyncTask<>(10000, () -> {
             try {
@@ -76,4 +76,46 @@ public class RestController {
         task.onError(() -> ResponseEntity.internalServerError().build());
         return task;
     }
+
+    @GetMapping("/sales")
+    public WebAsyncTask<ResponseEntity> sales(@RequestParam String date) {
+        WebAsyncTask<ResponseEntity> task = new WebAsyncTask<>(10000, () -> {
+            try {
+                return ResponseEntity.ok().body(unitService.sales(date));
+            }
+
+            catch (ShopUnitNotFoundException e) {
+                return ResponseEntity.status(404).body(new ResponseMessage(404,"Item not found"));
+            }
+            catch (BadRequestException e) {
+                log.warning(e.getMessage());
+                return ResponseEntity.badRequest().body(new ResponseMessage(400, "Validation Failed"));
+            }
+        });
+        task.onTimeout(() -> ResponseEntity.internalServerError().build());
+        task.onError(() -> ResponseEntity.internalServerError().build());
+        return task;
+    }
+
+    @GetMapping("/node/{id}/statistic")
+    public WebAsyncTask<ResponseEntity> statistics(@PathVariable String id, @RequestParam String dateStart, @RequestParam String dateEnd) {
+        WebAsyncTask<ResponseEntity> task = new WebAsyncTask<>(10000, () -> {
+            try {
+                return ResponseEntity.ok().body(unitService.statistics(id, dateStart, dateEnd));
+            }
+
+            catch (ShopUnitNotFoundException e) {
+                return ResponseEntity.status(404).body(new ResponseMessage(404,"Item not found"));
+            }
+            catch (BadRequestException e) {
+                log.warning(e.getMessage());
+                return ResponseEntity.badRequest().body(new ResponseMessage(400, "Validation Failed"));
+            }
+        });
+        task.onTimeout(() -> ResponseEntity.internalServerError().build());
+        task.onError(() -> ResponseEntity.internalServerError().build());
+        return task;
+    }
+
+
 }

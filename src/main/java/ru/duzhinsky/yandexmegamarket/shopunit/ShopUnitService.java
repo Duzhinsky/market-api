@@ -146,6 +146,7 @@ public class ShopUnitService {
     @Transactional(rollbackFor = Exception.class)
     public StatisticResponse sales(String date) {
         LocalDateTime salesDate = ShopUnitMapper.getDate(date);
+//        var sales = unitRepository.findAllByUpdateDateAfter(date.sub);
         return new StatisticResponse();
     }
 

@@ -4,6 +4,9 @@ import lombok.*;
 
 import java.util.List;
 
+/**
+ * An object that contains an import request.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter @Setter

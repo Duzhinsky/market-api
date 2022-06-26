@@ -2,6 +2,9 @@ package ru.duzhinsky.yandexmegamarket.dto.objects;
 
 import lombok.*;
 
+/**
+ * An object that contain data of an import request item
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter @Setter

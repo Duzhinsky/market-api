@@ -4,6 +4,10 @@ import lombok.*;
 
 import java.util.List;
 
+/**
+ * A data transfer object of a shop unit.
+ * Used as a response to a GET request.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter @Getter

@@ -16,9 +16,21 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * A class for mapping entities to data transfer objects and dto to entities
+ */
 @Component
 public class ShopUnitMapper {
 
+    /**
+     * Checks either the imported entity is valid.
+     * @param dto DTO of imported entity
+     * @throws WrongIdValueException if id is null
+     * @throws WrongNameException if name is null
+     * @throws WrongPriceValueException if price value is invalid
+     * @throws UnknownUnitTypeException if unit type is unknown
+     * @throws WrongParentDataException if id is equal to parent id
+     */
     public static void validateImportDto(ShopUnitImport dto) {
         if(dto.getId() == null)
             throw new WrongIdValueException();
@@ -39,6 +51,11 @@ public class ShopUnitMapper {
             throw new WrongParentDataException();
     }
 
+    /**
+     * Converts an entity to dto for get requests
+     * @param entity an entity being converted
+     * @return DTO of entity and it's sub hierarchy
+     */
     public ShopUnitDto toDto(ShopUnitEntity entity) {
         List<ShopUnitDto> childrens = null;
         if(entity.getType() == ShopUnitType.CATEGORY) {
@@ -58,6 +75,13 @@ public class ShopUnitMapper {
         );
     }
 
+    /**
+     * Converts a plain entity to new history entity.
+     * Since history entity is a plain entity with a date, a plain entity and date are required.
+     * @param entity entity being converted
+     * @param date a date of change
+     * @return A transient history entity
+     */
     public static ShopUnitHistoryEntity toHistoryEntity(ShopUnitEntity entity, LocalDateTime date) {
         ShopUnitHistoryEntity history = new ShopUnitHistoryEntity();
         history.setUnitId(entity.getId());
@@ -68,6 +92,11 @@ public class ShopUnitMapper {
         return history;
     }
 
+    /**
+     * Retrieves a date from the import request dto
+     * @param dto the request dto
+     * @return a date from the request
+     */
     public static LocalDateTime getDateFromDto(ShopUnitImportRequest dto) {
         try {
             return LocalDateTime.parse(dto.getUpdateDate(), DateTimeFormatter.ISO_DATE_TIME);

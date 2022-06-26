@@ -2,6 +2,10 @@ package ru.duzhinsky.yandexmegamarket.dto.objects;
 
 import lombok.*;
 
+/**
+ * A data transfer object for responses.
+ * Contains a code and a message.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter @Setter

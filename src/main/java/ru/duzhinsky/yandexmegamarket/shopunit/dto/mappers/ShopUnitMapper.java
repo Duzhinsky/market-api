@@ -1,5 +1,6 @@
 package ru.duzhinsky.yandexmegamarket.shopunit.dto.mappers;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.duzhinsky.yandexmegamarket.shopunit.dto.objects.ShopUnitDto;
 import ru.duzhinsky.yandexmegamarket.shopunit.dto.objects.ShopUnitImport;
@@ -8,12 +9,14 @@ import ru.duzhinsky.yandexmegamarket.shopunit.entity.ShopUnitEntity;
 import ru.duzhinsky.yandexmegamarket.shopunit.entity.ShopUnitHistoryEntity;
 import ru.duzhinsky.yandexmegamarket.shopunit.ShopUnitType;
 import ru.duzhinsky.yandexmegamarket.shopunit.exception.*;
+import ru.duzhinsky.yandexmegamarket.shopunit.repository.ShopUnitRepository;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -52,7 +55,7 @@ public class ShopUnitMapper {
     }
 
     /**
-     * Converts an entity to dto for get requests
+     * Map an entity to dto for get requests
      * @param entity an entity being converted
      * @return DTO of entity and it's sub hierarchy
      */
@@ -76,7 +79,7 @@ public class ShopUnitMapper {
     }
 
     /**
-     * Converts a plain entity to new history entity.
+     * Maps a plain entity to new history entity.
      * Since history entity is a plain entity with a date, a plain entity and date are required.
      * @param entity entity being converted
      * @param date a date of change
@@ -93,15 +96,16 @@ public class ShopUnitMapper {
     }
 
     /**
-     * Retrieves a date from the import request dto
-     * @param dto the request dto
-     * @return a date from the request
+     * Retrieves a date from the string
+     * @param date the date represented as a string
+     * @throws WrongDateFormatException if date format does not match ISO 8601
+     * @return a date as LocalDateTime
      */
-    public static LocalDateTime getDateFromDto(ShopUnitImportRequest dto) {
+    public static LocalDateTime getDate(String date) {
         try {
-            return LocalDateTime.parse(dto.getUpdateDate(), DateTimeFormatter.ISO_DATE_TIME);
+            return LocalDateTime.parse(date, DateTimeFormatter.ISO_DATE_TIME);
         } catch(DateTimeParseException e) {
-            throw new WrongDateFormatException("Date format does not matches ISO 8601");
+            throw new WrongDateFormatException("Date format does not match ISO 8601");
         }
     }
 }

@@ -561,7 +561,7 @@ public class ImportTests {
     }
 
     @Test
-    public void littleStress() {
+    public void stress() {
         List<List<ShopUnitImport>> batches = new ArrayList<>();
         UUID prevID = null;
         for(int i = 0; i < 10; ++i) {

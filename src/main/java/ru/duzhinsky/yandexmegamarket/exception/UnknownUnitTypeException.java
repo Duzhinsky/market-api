@@ -1,5 +1,8 @@
 package ru.duzhinsky.yandexmegamarket.exception;
 
+/**
+ * The exception is thrown when a unit type from the request is unknown.
+ */
 public class UnknownUnitTypeException extends BadRequestException {
     public UnknownUnitTypeException() {
         super("The unit type is unknown");

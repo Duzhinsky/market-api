@@ -1,5 +1,8 @@
 package ru.duzhinsky.yandexmegamarket.exception;
 
+/**
+ * The exception is thrown when name value in the request is null
+ */
 public class WrongNameException extends BadRequestException {
     public WrongNameException() {
         super("Name value is wrong");

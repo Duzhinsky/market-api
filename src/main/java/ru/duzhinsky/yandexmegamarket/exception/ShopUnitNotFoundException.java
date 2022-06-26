@@ -1,5 +1,8 @@
 package ru.duzhinsky.yandexmegamarket.exception;
 
+/**
+ * The exception is thrown when a requested item was not found
+ */
 public class ShopUnitNotFoundException extends BadRequestException {
     public ShopUnitNotFoundException() {
         super("Shop unit was not found");

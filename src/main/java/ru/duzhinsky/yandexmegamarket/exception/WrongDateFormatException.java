@@ -1,5 +1,8 @@
 package ru.duzhinsky.yandexmegamarket.exception;
 
+/**
+ * The exception is thrown when a date from the request does mot match the format.
+ */
 public class WrongDateFormatException extends BadRequestException {
     public WrongDateFormatException() {
         super("The date does not match the format");

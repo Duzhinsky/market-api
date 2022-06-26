@@ -1,5 +1,8 @@
 package ru.duzhinsky.yandexmegamarket.exception;
 
+/**
+ * The exception is thrown when the request tries to change type of shop unit.
+ */
 public class ShopUnitTypeChangeException extends BadRequestException {
     public ShopUnitTypeChangeException() {
         super("Change of shop unit type is forbidden");

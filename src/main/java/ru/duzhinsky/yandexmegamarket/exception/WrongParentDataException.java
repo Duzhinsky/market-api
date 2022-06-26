@@ -1,5 +1,12 @@
 package ru.duzhinsky.yandexmegamarket.exception;
 
+/**
+ * The exception is thrown when parent value in the request is invalid.
+ * It could happen in the following cases:
+ * - parent unit does not exist
+ * - parent is an offer
+ * - a cycle is being formed
+ */
 public class WrongParentDataException extends BadRequestException {
     public WrongParentDataException() {
         super("Parent field data is invalid");

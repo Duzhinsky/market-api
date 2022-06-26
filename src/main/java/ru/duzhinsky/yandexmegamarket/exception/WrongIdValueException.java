@@ -1,5 +1,8 @@
 package ru.duzhinsky.yandexmegamarket.exception;
 
+/**
+ * The exception is thrown when id value in the request is null
+ */
 public class WrongIdValueException extends BadRequestException {
     public WrongIdValueException() {
         super("Wrong id value");

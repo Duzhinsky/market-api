@@ -146,8 +146,8 @@ public class ShopUnitService {
     @Transactional(rollbackFor = Exception.class)
     public StatisticResponse sales(String date) {
         LocalDateTime salesDate = ShopUnitMapper.getDate(date);
-//        var sales = unitRepository.findAllByUpdateDateAfter(date.sub);
-        return new StatisticResponse();
+        var sales = unitRepository.findAllByUpdateDateGreaterThanEqual(salesDate.minusDays(1));
+        return ShopUnitMapper.toSalesDto(sales);
     }
 
     /**
@@ -162,7 +162,9 @@ public class ShopUnitService {
     public StatisticResponse statistics(String id, String start, String end) {
         try {
             UUID uuid = UUID.fromString(id);
-            return new StatisticResponse();
+            LocalDateTime startDate = ShopUnitMapper.getDate(start);
+            LocalDateTime endDate = ShopUnitMapper.getDate(end);
+            return ShopUnitMapper.toStatisticDto(historyRepository.getStatistics(uuid, startDate, endDate));
         } catch (IllegalArgumentException e) {
             throw new UUIDFormatException();
         }
@@ -210,8 +212,15 @@ public class ShopUnitService {
                 if(parentOptional.isEmpty()) {
                     throw new WrongParentDataException();
                 }
+                if(entity.getParent() != null && !entity.getParent().getId().toString().equals(node.getParentId())) {
+                    onCategoryOfferChanged(
+                            parentOptional.get(),
+                            entity.getMetadata().getTotalPrice(),
+                            entity.getMetadata().getOffersCount(),
+                            categoriesPool
+                    );
+                }
                 entity.setParent(parentOptional.get());
-                // todo test перемещения подкатегории.
             }
         }
 

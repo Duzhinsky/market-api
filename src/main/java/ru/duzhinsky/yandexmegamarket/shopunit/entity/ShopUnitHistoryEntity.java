@@ -1,5 +1,6 @@
 package ru.duzhinsky.yandexmegamarket.shopunit.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -35,6 +36,9 @@ public class ShopUnitHistoryEntity {
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "parent", nullable = true)
+    private UUID parent;
 
     @Column(name = "type", nullable = false, length = 32)
     @Enumerated(EnumType.STRING)

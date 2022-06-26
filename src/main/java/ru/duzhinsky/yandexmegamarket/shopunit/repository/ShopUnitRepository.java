@@ -10,5 +10,8 @@ import java.util.UUID;
 
 @Repository
 public interface ShopUnitRepository extends CrudRepository<ShopUnitEntity, UUID> {
-    List<ShopUnitEntity> findAllByUpdateDateAfter(LocalDateTime updateDate);
+    List<ShopUnitEntity> findAllByUpdateDateGreaterThanEqual(LocalDateTime updateDate);
+    default List<ShopUnitEntity> findAllUpdatedAfter(LocalDateTime after) {
+        return findAllByUpdateDateGreaterThanEqual(after);
+    }
 }

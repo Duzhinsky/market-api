@@ -1,22 +1,17 @@
 package ru.duzhinsky.yandexmegamarket.shopunit.dto.mappers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.duzhinsky.yandexmegamarket.shopunit.dto.objects.ShopUnitDto;
-import ru.duzhinsky.yandexmegamarket.shopunit.dto.objects.ShopUnitImport;
-import ru.duzhinsky.yandexmegamarket.shopunit.dto.objects.ShopUnitImportRequest;
+import ru.duzhinsky.yandexmegamarket.shopunit.dto.objects.*;
 import ru.duzhinsky.yandexmegamarket.shopunit.entity.ShopUnitEntity;
 import ru.duzhinsky.yandexmegamarket.shopunit.entity.ShopUnitHistoryEntity;
 import ru.duzhinsky.yandexmegamarket.shopunit.ShopUnitType;
 import ru.duzhinsky.yandexmegamarket.shopunit.exception.*;
-import ru.duzhinsky.yandexmegamarket.shopunit.repository.ShopUnitRepository;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -78,6 +73,40 @@ public class ShopUnitMapper {
         );
     }
 
+    public static StatisticResponseUnit toStatisticUnitDto(ShopUnitEntity entity) {
+        return new StatisticResponseUnit(
+                entity.getId().toString(),
+                entity.getName(),
+                entity.getUpdateDate().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")),
+                entity.getParent() == null ? null : entity.getParent().getId().toString(),
+                entity.getPrice(),
+                entity.getType().toString()
+        );
+    }
+
+    public static StatisticResponseUnit toStatisticUnitDto(ShopUnitHistoryEntity entity) {
+        return new StatisticResponseUnit(
+                entity.getId().toString(),
+                entity.getName(),
+                entity.getUpdateDate().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")),
+                entity.getParent() == null ? null : entity.getParent().toString(),
+                entity.getPrice(),
+                entity.getType().toString()
+        );
+    }
+
+    public static StatisticResponse toSalesDto(List<ShopUnitEntity> entityList) {
+        return new StatisticResponse(
+                entityList.stream().map(ShopUnitMapper::toStatisticUnitDto).collect(Collectors.toList())
+        );
+    }
+
+    public static StatisticResponse toStatisticDto(List<ShopUnitHistoryEntity> entityList) {
+        return new StatisticResponse(
+                entityList.stream().map(ShopUnitMapper::toStatisticUnitDto).collect(Collectors.toList())
+        );
+    }
+
     /**
      * Maps a plain entity to new history entity.
      * Since history entity is a plain entity with a date, a plain entity and date are required.
@@ -91,6 +120,8 @@ public class ShopUnitMapper {
         history.setName(entity.getName());
         history.setType(entity.getType());
         history.setPrice(entity.getPrice());
+        if(entity.getParent() != null)
+            history.setParent(entity.getParent().getId());
         history.setUpdateDate(date);
         return history;
     }

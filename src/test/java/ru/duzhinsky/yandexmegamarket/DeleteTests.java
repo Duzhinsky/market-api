@@ -10,9 +10,9 @@ import org.springframework.http.*;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
-import ru.duzhinsky.yandexmegamarket.dto.objects.ShopUnitImport;
-import ru.duzhinsky.yandexmegamarket.dto.objects.ShopUnitImportRequest;
-import ru.duzhinsky.yandexmegamarket.repository.ShopUnitRepository;
+import ru.duzhinsky.yandexmegamarket.shopunit.dto.objects.ShopUnitImport;
+import ru.duzhinsky.yandexmegamarket.shopunit.dto.objects.ShopUnitImportRequest;
+import ru.duzhinsky.yandexmegamarket.shopunit.repository.ShopUnitRepository;
 
 import java.util.*;
 

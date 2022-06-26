@@ -10,7 +10,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-
+/**
+ * An entity for imported data
+ */
 @Getter @Setter
 @NoArgsConstructor
 @Entity

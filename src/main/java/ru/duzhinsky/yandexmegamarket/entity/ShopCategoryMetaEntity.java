@@ -9,6 +9,10 @@ import javax.persistence.*;
 import java.math.BigInteger;
 import java.util.UUID;
 
+/**
+ * An entity for storing metadata of category.
+ * Used to avoid traversing the entire subtree (childs of category) with each change.
+ */
 @Getter @Setter
 @NoArgsConstructor
 @Entity

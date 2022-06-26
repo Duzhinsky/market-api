@@ -9,6 +9,15 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/*
+The history is stored in another table to decrease size of the main table.
+See type 4 at: https://en.wikipedia.org/wiki/Slowly_changing_dimension
+ */
+
+/**
+ * An entity for storing history of shop unit values.
+ * It's represented as a shop entity with data of change.
+ */
 @Getter @Setter
 @NoArgsConstructor
 @Entity

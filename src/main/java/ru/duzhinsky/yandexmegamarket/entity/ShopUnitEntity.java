@@ -3,7 +3,7 @@ package ru.duzhinsky.yandexmegamarket.entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.LazyGroup;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -35,11 +35,14 @@ public class ShopUnitEntity {
 
     @JoinColumn(name = "parent", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
+    @LazyGroup("parent")
     private ShopUnitEntity parent;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @LazyGroup("childrens")
     private List<ShopUnitEntity> childrens;
 
     @OneToOne(mappedBy = "category", fetch = FetchType.LAZY)
+    @LazyGroup("metadata")
     private ShopCategoryMetaEntity metadata;
 }

@@ -17,11 +17,13 @@ import ru.duzhinsky.yandexmegamarket.repository.ShopCategoryMetaRepository;
 import ru.duzhinsky.yandexmegamarket.repository.ShopUnitHistoryRepository;
 import ru.duzhinsky.yandexmegamarket.repository.ShopUnitRepository;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-public class PostImportTests {
+public class ImportTests {
     @Autowired
     private TestRestTemplate restTemplate;
 
@@ -31,6 +33,8 @@ public class PostImportTests {
     private ShopUnitHistoryRepository historyRepository;
     @Autowired
     private ShopCategoryMetaRepository metaRepository;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     private void isBadRequestResponseForInvalid(ResponseEntity<Object> response) {
         Assert.isTrue(response.getStatusCode() == HttpStatus.BAD_REQUEST, "Status code should be 400");
@@ -88,8 +92,9 @@ public class PostImportTests {
     @Test
     public void shouldInsertRandom() {
         List<ShopUnitImport> items = new ArrayList<>();
+        UUID id = UUID.randomUUID();
         items.add(new ShopUnitImport(
-                UUID.randomUUID().toString(),
+                id.toString(),
                 "random",
                 null,
                 ShopUnitType.OFFER.toString(),
@@ -100,6 +105,11 @@ public class PostImportTests {
                 "2022-02-02T12:00:00.000Z"
         );
         testSuccessfullInsetion(requestDto);
+        System.out.println("q1");
+        var item = unitRepository.findById(id);
+        System.out.println("q2");
+        var itemR = unitRepository.findById(id);
+        System.out.println("after");
     }
 
     @Test
@@ -325,6 +335,37 @@ public class PostImportTests {
     }
 
     @Test
+    public void parentShouldExist() {
+        List<ShopUnitImport> items = new ArrayList<>();
+        items.add(new ShopUnitImport(
+                UUID.randomUUID().toString(),
+                "some name",
+                UUID.randomUUID().toString(),
+                ShopUnitType.OFFER.toString(),
+                150L
+        ));
+        ShopUnitImportRequest requestDto = new ShopUnitImportRequest(
+                items,
+                "2022-02-02T12:00:00.000Z"
+        );
+        testInvalidRequest(requestDto);
+
+        List<ShopUnitImport> items2 = new ArrayList<>();
+        items2.add(new ShopUnitImport(
+                UUID.randomUUID().toString(),
+                "some name",
+                UUID.randomUUID().toString(),
+                ShopUnitType.CATEGORY.toString(),
+                null
+        ));
+        requestDto = new ShopUnitImportRequest(
+                items2,
+                "2022-02-02T12:00:00.000Z"
+        );
+        testInvalidRequest(requestDto);
+    }
+
+    @Test
     public void sampleAssertions() {
         List<ShopUnitImport> batch1 = new ArrayList<>();
         batch1.add(new ShopUnitImport(
@@ -517,5 +558,37 @@ public class PostImportTests {
         cat1Opt = unitRepository.findById((UUID.fromString("1e1079ba-f285-11ec-b939-0242ac120002")));
         Assert.isTrue(cat1Opt.isPresent(), "Category 1 should present");
         Assert.isTrue(cat1Opt.get().getPrice().equals(400L), "Category 1 av price should change");
+    }
+
+    @Test
+    public void littleStress() {
+        List<List<ShopUnitImport>> batches = new ArrayList<>();
+        UUID prevID = null;
+        for(int i = 0; i < 10; ++i) {
+            UUID id = UUID.randomUUID();
+            var newBatch = new ArrayList<ShopUnitImport>();
+            newBatch.add(new ShopUnitImport(
+                    id.toString(),
+                    "Cat " + i,
+                    prevID == null ? null : prevID.toString(),
+                    ShopUnitType.CATEGORY.toString(),
+                    null
+            ));
+            for(int k = 0; k < 100; ++k) {
+                newBatch.add(new ShopUnitImport(
+                        UUID.randomUUID().toString(),
+                        "Off " + i + " " + k,
+                        id.toString(),
+                        ShopUnitType.OFFER.toString(),
+                        100L
+                ));
+            }
+            prevID = id;
+            batches.add(newBatch);
+        }
+        for(var batch : batches) {
+            var requestDto = new ShopUnitImportRequest(batch, "2022-02-05T15:00:00.000Z");
+            testSuccessfullInsetion(requestDto);
+        }
     }
 }

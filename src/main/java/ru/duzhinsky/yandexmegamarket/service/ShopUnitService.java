@@ -38,14 +38,7 @@ public class ShopUnitService {
     private ShopUnitMapper mapper;
 
     @Transactional(rollbackFor = Exception.class)
-    public void importUnits(ShopUnitImportRequest requestDto)
-            throws WrongDateFormatException,
-            UnknownUnitTypeException,
-            WrongNameException,
-            WrongIdValueException,
-            WrongPriceValueException,
-            WrongParentDataException
-    {
+    public void importUnits(ShopUnitImportRequest requestDto) {
         LocalDateTime importDate = ShopUnitMapper.getDateFromDto(requestDto);
         for(var importDto : requestDto.getItems())
             ShopUnitMapper.validateImportDto(importDto);
@@ -67,11 +60,6 @@ public class ShopUnitService {
             ShopUnitImport node = presentNodes.get(nodeId);
             String parentId = node.getParentId();
             if(!presentNodes.containsKey(parentId)) {
-                if(parentId != null) {
-                    var parentOpt = unitRepository.findById(UUID.fromString(parentId));
-                    if(parentOpt.isEmpty())
-                        throw new WrongParentDataException();
-                }
                 insertNodes(node, childrens, categoriesPool, importDate);
             }
         }
@@ -79,11 +67,8 @@ public class ShopUnitService {
     }
 
     @Async
-    protected void insertNodes(ShopUnitImport node, Map<String, List<ShopUnitImport>> childrens, Set<ShopUnitEntity> categoriesPool, LocalDateTime date)
-            throws WrongParentDataException,
-            UnknownUnitTypeException
-    {
-        log.info("Insert node: " + node.getName());
+    protected void insertNodes(ShopUnitImport node, Map<String, List<ShopUnitImport>> childrens, Set<ShopUnitEntity> categoriesPool, LocalDateTime date) {
+        log.info("Inserting " + node.getName());
 
         var storedOptional = unitRepository.findById(UUID.fromString(node.getId()));
         if(storedOptional.isPresent() && !storedOptional.get().getType().toString().equals(node.getType()))
@@ -168,10 +153,7 @@ public class ShopUnitService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void delete(String uuid)
-            throws UUIDFormatException,
-            ShopUnitNotFoundException
-    {
+    public void delete(String uuid) {
         try {
             UUID id = UUID.fromString(uuid);
             var nodeOpt = unitRepository.findById(id);
@@ -197,10 +179,7 @@ public class ShopUnitService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ShopUnitDto get(String uuid)
-            throws UUIDFormatException,
-            ShopUnitNotFoundException
-    {
+    public ShopUnitDto get(String uuid) {
         try {
             UUID id = UUID.fromString(uuid);
             var node = unitRepository.findById(id);
@@ -213,6 +192,7 @@ public class ShopUnitService {
     }
 
     private void changeCategoryPrice(ShopUnitEntity category, BigInteger priceChange, BigInteger countChange, Set<ShopUnitEntity> categoriesPool, LocalDateTime date) {
+        log.info("change category " + category.getName());
         categoriesPool.add(category);
         ShopCategoryMetaEntity meta = null;
         if(category.getMetadata() == null) {

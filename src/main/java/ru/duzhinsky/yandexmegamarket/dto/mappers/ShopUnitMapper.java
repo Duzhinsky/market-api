@@ -19,13 +19,7 @@ import java.util.stream.Collectors;
 @Component
 public class ShopUnitMapper {
 
-    public static void validateImportDto(ShopUnitImport dto)
-            throws WrongNameException,
-            UnknownUnitTypeException,
-            WrongPriceValueException,
-            WrongIdValueException,
-            WrongParentDataException
-    {
+    public static void validateImportDto(ShopUnitImport dto) {
         if(dto.getId() == null)
             throw new WrongIdValueException();
         if(dto.getName() == null)
@@ -74,11 +68,11 @@ public class ShopUnitMapper {
         return history;
     }
 
-    public static LocalDateTime getDateFromDto(ShopUnitImportRequest dto) throws WrongDateFormatException {
+    public static LocalDateTime getDateFromDto(ShopUnitImportRequest dto) {
         try {
             return LocalDateTime.parse(dto.getUpdateDate(), DateTimeFormatter.ISO_DATE_TIME);
         } catch(DateTimeParseException e) {
-            throw new WrongDateFormatException("Date format does not fits iso 8601");
+            throw new WrongDateFormatException("Date format does not matches ISO 8601");
         }
     }
 }

@@ -1,15 +1,13 @@
 package ru.duzhinsky.yandexmegamarket.dto.objects;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter @Getter
+@EqualsAndHashCode(of="id")
 public class ShopUnitDto {
     private String id;
     private String name;

@@ -26,6 +26,7 @@ public class ShopUnitController {
                 return ResponseEntity.ok().build();
             }
             catch (BadRequestException e) {
+                log.warning(e.getMessage());
                 return ResponseEntity.badRequest().body(new ResponseMessage(400,"Validation Failed"));
             }
         });
@@ -60,10 +61,12 @@ public class ShopUnitController {
             try {
                 return ResponseEntity.ok().body(unitService.get(id));
             }
+
             catch (ShopUnitNotFoundException e) {
                 return ResponseEntity.status(404).body(new ResponseMessage(404,"Item not found"));
             }
             catch (BadRequestException e) {
+                log.warning(e.getMessage());
                 return ResponseEntity.badRequest().body(new ResponseMessage(400, "Validation Failed"));
             }
         });

@@ -1,4 +1,4 @@
-package ru.duzhinsky.yandexmegamarket;
+package ru.duzhinsky.yandexmegamarket.shopunit;
 
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,16 +6,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.duzhinsky.yandexmegamarket.dto.ResponseMessage;
 import ru.duzhinsky.yandexmegamarket.shopunit.dto.objects.ShopUnitImportRequest;
-import ru.duzhinsky.yandexmegamarket.shopunit.ShopUnitService;
 import ru.duzhinsky.yandexmegamarket.shopunit.exception.BadRequestException;
 import ru.duzhinsky.yandexmegamarket.shopunit.exception.ShopUnitNotFoundException;
 
 import java.util.logging.Level;
 
-@org.springframework.web.bind.annotation.RestController
+@RestController
 @RequestMapping("/")
 @Log
-public class RestController {
+public class ShopUnitRestController {
     @Autowired
     private ShopUnitService unitService;
 
